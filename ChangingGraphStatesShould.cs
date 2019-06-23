@@ -15,13 +15,14 @@ namespace Tests
     internal class ChangingGraphStatesShould : TestsBase
     {
         [Test]
-        public void Construct_Update_Save_GraphObject()
+        public void ConstructGraph_Update_Save()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             using (var context = new LoanContext())
             {
                 var loan = new Loan(childrenToo:true);
                 loan.Log("Constructed", context);
+                loan.Lender.ShouldNotBeNull();
                 context.LoanGraphStateShouldBe(loan, Detached);
 
                 context.Update(loan);
@@ -31,17 +32,22 @@ namespace Tests
                 context.SaveChanges();
                 loan.Log("SaveChanges", context);
                 context.LoanGraphStateShouldBe(loan, Unchanged);
+                context.LoanGraphStateShouldBe(loan, Unchanged);
+                loan.Id.ShouldNotBe(Guid.Empty);
+                loan.Lender.Id.ShouldNotBe(Guid.Empty);
+                loan.LenderContact.Id.ShouldNotBe(Guid.Empty);
+                loan.LenderContact.Lender.Id.ShouldBe(loan.Lender.Id);
             }
         }
 
         [Test]
-        public void Construct_Add_Save_GraphObject()
+        public void ConstructGraph_Add_Save()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             using (var context = new LoanContext())
             {
-                var loan = new Loan(childrenToo:true);
-                loan.Log("Constructed", context);
+                var loan = new Loan(childrenToo: true);
+                loan.Lender.ShouldNotBeNull();
                 context.LoanGraphStateShouldBe(loan, Detached);
 
                 context.Add(loan);
@@ -51,11 +57,15 @@ namespace Tests
                 context.SaveChanges();
                 loan.Log("SaveChanges", context);
                 context.LoanGraphStateShouldBe(loan, Unchanged);
+                loan.Id.ShouldNotBe(Guid.Empty);
+                loan.Lender.Id.ShouldNotBe(Guid.Empty);
+                loan.LenderContact.Id.ShouldNotBe(Guid.Empty);
+                loan.LenderContact.Lender.Id.ShouldBe(loan.Lender.Id);
             }
         }
 
         [Test]
-        public void Construct_Attach_GraphObject()
+        public void ConstructGraph_Attach_Save()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             using (var context = new LoanContext())
@@ -67,11 +77,19 @@ namespace Tests
                 context.Attach(loan);
                 loan.Log("Attach after constructed", context);
                 context.LoanGraphStateShouldBe(loan, Added);
+
+                context.SaveChanges();
+                loan.Log("SaveChanges", context);
+                context.LoanGraphStateShouldBe(loan, Unchanged);
+                loan.Id.ShouldNotBe(Guid.Empty);
+                loan.Lender.Id.ShouldNotBe(Guid.Empty);
+                loan.LenderContact.Id.ShouldNotBe(Guid.Empty);
+                loan.LenderContact.Lender.Id.ShouldBe(loan.Lender.Id);
             }
         }
 
         [Test]
-        public void Construct_Attach_SetState_GraphObject()
+        public void ConstructGraph_Attach_SetState()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             using (var context = new LoanContext())
@@ -89,7 +107,7 @@ namespace Tests
         }
 
         [Test]
-        public void Construct_SetState_GraphObject()
+        public void ConstructGraph_SetState()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             using (var context = new LoanContext())
@@ -107,7 +125,7 @@ namespace Tests
         }
 
         [Test]
-        public void Save_Find_GraphObject()
+        public void Save_Find_Graph()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             var loan = SaveNewLoan();
@@ -124,7 +142,7 @@ namespace Tests
         }
 
         [Test]
-        public void Save_Linq_GraphObject()
+        public void Save_Linq_Graph()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             var loan = SaveNewLoan();
@@ -133,7 +151,6 @@ namespace Tests
                 var foundLoan = context.Set<Loan>()
                             .SingleOrDefault(o => o.Id == loan.Id);
                 foundLoan.ShouldNotBeNull();
-
                 foundLoan.Log("Find", context);
                 context.StateShouldBe(foundLoan, Unchanged);
                 foundLoan.Lender.ShouldBeNull();
@@ -142,7 +159,7 @@ namespace Tests
         }
 
         [Test]
-        public void Save_Linq_Include_GraphObject()
+        public void Save_Linq_Include_Graph()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             var loan = SaveNewLoan();
@@ -162,7 +179,7 @@ namespace Tests
         }
 
         [Test]
-        public void Throws_Save_Linq_Include_Attach_GraphObject()
+        public void Save_Linq_Include_Attach_Graph_Throw()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             var xferLoan = SaveNewLoanAndDetach();
@@ -180,7 +197,7 @@ namespace Tests
         }
 
         [Test]
-        public void Throws_Save_Linq_Include_Update_GraphObject()
+        public void Save_Linq_Include_Update_Graph_Throw()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             var xferLoan = SaveNewLoanAndDetach();
@@ -198,12 +215,10 @@ namespace Tests
         }
 
         [Test]
-        public void Save_Linq_Include_Attach_GraphObject()
+        public void Save_Linq_Include_SetState_Graph()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
 
-            // can't just switch context, just do
-            // something like this to make new objects
             var xferLoan = SaveNewLoanAndDetach();
 
             using (var context = new LoanContext())
@@ -213,11 +228,16 @@ namespace Tests
                 context.StateShouldBe(xferLoan, Modified);
                 context.StateShouldBe(xferLoan.Lender, Detached);
                 context.StateShouldBe(xferLoan.LenderContact, Detached);
+
+                context.SaveChanges();
+                context.StateShouldBe(xferLoan, Unchanged);
+                context.StateShouldBe(xferLoan.Lender, Detached);
+                context.StateShouldBe(xferLoan.LenderContact, Detached);
             }
         }
 
         [Test]
-        public void Save_Find_Update_GraphObject()
+        public void Save_Find_Update_Graph()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
             var loan = SaveNewLoan();
@@ -235,5 +255,34 @@ namespace Tests
                 foundLoan.Name.ShouldBe("Peoria");
             }
         }
+
+        [Test]
+        public void ConstructGraph_Add_Save_Delete()
+        {
+            var loan = SaveNewLoan();
+            using (var context = new LoanContext())
+            {
+                var foundLoan = context.Set<Loan>()
+                    .Include(o => o.Lender)
+                    .Include(o => o.LenderContact)
+                    .SingleOrDefault(o => o.Id == loan.Id);
+                foundLoan.ShouldNotBeNull();
+                foundLoan.Log("Find", context);
+                context.StateShouldBe(foundLoan, Unchanged);
+
+                context.Remove(foundLoan);
+                foundLoan.Log("Remove", context);
+                context.StateShouldBe(foundLoan, Deleted);
+                context.StateShouldBe(foundLoan.Lender, Unchanged); //  not cascading delete
+                context.StateShouldBe(foundLoan.LenderContact, Unchanged);
+
+                context.SaveChanges();
+                foundLoan.Log("SaveChanged", context);
+                context.StateShouldBe(foundLoan, Detached);
+                context.StateShouldBe(foundLoan.Lender, Unchanged); //  not cascading delete
+                context.StateShouldBe(foundLoan.LenderContact, Unchanged);
+            }
+        }
+
     }
 }

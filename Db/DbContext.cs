@@ -5,7 +5,7 @@ namespace Db
 {
     public class LoanContext : DbContext
     {
-        public DbSet<Address> Addresses { get; set; }
+        public DbSet<Thing> Things { get; set; }
         public DbSet<Loan> Loans { get; set; }
         public DbSet<Lender> Lenders { get; set; }
         public DbSet<LenderContact> LenderContacts { get; set; }

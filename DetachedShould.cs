@@ -13,61 +13,61 @@ namespace Tests
     internal class DetachedShould : TestsBase
     {
         [Test]
-        public void Attach_Address()
+        public void Attach_Thing()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
-            var address = SaveNewAddressAndDetach();
+            var thing = SaveNewThingAndDetach();
 
             using ( var context = new LoanContext())
             {
-                context.Attach(address);
-                context.StateShouldBe(address,Unchanged);
+                context.Attach(thing);
+                context.StateShouldBe(thing,Unchanged);
 
-                address.City = "Peoria";
-                context.StateShouldBe(address,Modified);
+                thing.Name = "Peoria";
+                context.StateShouldBe(thing,Modified);
                 context.SaveChanges();
             }
             using ( var context = new LoanContext())
             {
-                address = context.Set<Address>().Find(address.Id);
-                address.ShouldNotBeNull();
-                address.City.ShouldBe("Peoria");
+                thing = context.Set<Thing>().Find(thing.Id);
+                thing.ShouldNotBeNull();
+                thing.Name.ShouldBe("Peoria");
             }
         }
 
         [Test]
-        public void Update_Address()
+        public void Update_Thing()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
-            var address = SaveNewAddressAndDetach();
+            var thing = SaveNewThingAndDetach();
 
             using ( var context = new LoanContext())
             {
-                context.Update(address);
-                context.StateShouldBe(address,Modified);
+                context.Update(thing);
+                context.StateShouldBe(thing,Modified);
 
-                address.City = "Peoria";
-                context.StateShouldBe(address,Modified);
+                thing.Name = "Peoria";
+                context.StateShouldBe(thing,Modified);
                 context.SaveChanges();
             }
             using ( var context = new LoanContext())
             {
-                address = context.Set<Address>().Find(address.Id);
-                address.ShouldNotBeNull();
-                address.City.ShouldBe("Peoria");
+                thing = context.Set<Thing>().Find(thing.Id);
+                thing.ShouldNotBeNull();
+                thing.Name.ShouldBe("Peoria");
             }
         }
 
         [Test]
-        public void Throw_Add_Duplicate_Address()
+        public void Throw_Add_Duplicate_Thing()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
-            var address = SaveNewAddressAndDetach();
+            var thing = SaveNewThingAndDetach();
 
             using ( var context = new LoanContext())
             {
-                context.Add(address);
-                context.StateShouldBe(address,Added);
+                context.Add(thing);
+                context.StateShouldBe(thing,Added);
 
                 try
                 {

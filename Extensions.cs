@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Shouldly;
@@ -7,44 +8,53 @@ namespace Extensions
 {
     public static class LogExts
     {
+        private static bool _shouldLog = true;
+        public static bool ShouldLog { get {return  _shouldLog; } set {_shouldLog = true;}}
+
+        private static void WriteLog(string msg)
+        {
+            if ( _shouldLog )
+                WriteLine(msg);
+        }
+
         public static void Log(this Loan loan, string msg, DbContext context)
         {
             if (loan != null)
             {
-                WriteLine($"\r\nLoan '{msg}' -- state = {context.Entry(loan).State} -- id = {loan.Id}");
+                WriteLog($"{Environment.NewLine}Loan '{msg}' -- state = {context.Entry(loan).State} -- id = {loan.Id}");
                 loan?.Lender.Log(msg, context);
                 loan?.LenderContact.Log(msg, context);
             }
             else
-                WriteLine($"\r\nLoan '{msg}' -- null");
+                WriteLog($"{Environment.NewLine}Loan '{msg}' -- null");
         }
         public static void Log(this Lender lender, string msg, DbContext context, string indent = "")
         {
             if (lender != null)
             {
-                WriteLine($"{indent}    Lender '{msg}' -- state = {context.Entry(lender).State} -- id = {lender.Id}");
+                WriteLog($"{indent}    Lender '{msg}' -- state = {context.Entry(lender).State} -- id = {lender.Id}");
             }
             else
-                WriteLine($"{indent}    Lender '{msg}' -- null");
+                WriteLog($"{indent}    Lender '{msg}' -- null");
         }
         public static void Log(this LenderContact contact, string msg, DbContext context)
         {
             if (contact != null)
             {
-                WriteLine($"    LenderContact '{msg}' -- state = {context.Entry(contact).State} -- id = {contact.Id}");
+                WriteLog($"    LenderContact '{msg}' -- state = {context.Entry(contact).State} -- id = {contact.Id}");
                 contact?.Lender.Log(msg, context, "    ");
             }
             else
-                WriteLine($"    LenderContact '{msg}' -- null");
+                WriteLog($"    LenderContact '{msg}' -- null");
         }
-        public static void Log(this Address address, string msg, DbContext context)
+        public static void Log(this Thing thing, string msg, DbContext context)
         {
-            if (address != null)
+            if (thing != null)
             {
-                WriteLine($"\r\nAddress '{msg}' -- state = {context.Entry(address).State} -- id = {address.Id}");
+                WriteLog($"{Environment.NewLine}Thing '{msg}' -- state = {context.Entry(thing).State} -- id = {thing.Id}");
             }
             else
-                WriteLine($"\r\nAddress '{msg}' -- null");
+                WriteLog($"{Environment.NewLine}Thing '{msg}' -- null");
         }
         public static void StateShouldBe(this DbContext context, object obj, Microsoft.EntityFrameworkCore.EntityState state)
         {
@@ -58,7 +68,7 @@ namespace Extensions
         }
         public static void LogMsg(string msg)
         {
-            WriteLine($"\r\n---- {msg}");
+            WriteLog($"{Environment.NewLine}---- {msg}");
         }
     }
 }

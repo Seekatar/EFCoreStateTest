@@ -21,16 +21,16 @@ namespace Tests
             }
         }
 
-        protected Address SaveNewAddress()
+        protected Thing SaveNewThing()
         {
             using ( var context = new LoanContext())
             {
-                var address = new Address();
-                context.Update(address);
-                context.StateShouldBe(address,Added);
+                var thing = new Thing();
+                context.Update(thing);
+                context.StateShouldBe(thing,Added);
                 context.SaveChanges();
-                context.StateShouldBe(address,Unchanged);
-                return address;
+                context.StateShouldBe(thing,Unchanged);
+                return thing;
             }
         }
 
@@ -76,26 +76,26 @@ namespace Tests
             return xferLoan;
         }
 
-        protected Address SaveNewAddressAndDetach()
+        protected Thing SaveNewThingAndDetach()
         {
-            var address = SaveNewAddress();
+            var thing = SaveNewThing();
 
-            Address xferAddress = null;
+            Thing xferThing = null;
 
             using (var context = new LoanContext())
             {
-                var foundAddress = context.Set<Address>()
-                            .SingleOrDefault(o => o.Id == address.Id);
-                foundAddress.ShouldNotBeNull();
-                foundAddress.Log("Find", context);
-                context.StateShouldBe(foundAddress, Unchanged);
+                var foundThing = context.Set<Thing>()
+                            .SingleOrDefault(o => o.Id == thing.Id);
+                foundThing.ShouldNotBeNull();
+                foundThing.Log("Find", context);
+                context.StateShouldBe(foundThing, Unchanged);
 
-                xferAddress = JsonConvert.DeserializeObject<Address>(JsonConvert.SerializeObject(foundAddress));
-                context.StateShouldBe(xferAddress, Detached);
-                xferAddress.Log("After Deserialize", context);
+                xferThing = JsonConvert.DeserializeObject<Thing>(JsonConvert.SerializeObject(foundThing));
+                context.StateShouldBe(xferThing, Detached);
+                xferThing.Log("After Deserialize", context);
             }
 
-            return xferAddress;
+            return xferThing;
         }
 
     }
