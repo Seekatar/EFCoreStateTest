@@ -38,7 +38,7 @@ If EF Core knows about your PKs, `Update` works for both adds and updates of obj
 
 The following diagram shows how the EF Core State changed with various `DbContext` methods, or other actions.
 
-![test](./doc/State.png)
+![StateDiagram](/Doc/State.png)
 
 # Test Details
 The tests cover all the paths in the diagram in at least one flavor.
