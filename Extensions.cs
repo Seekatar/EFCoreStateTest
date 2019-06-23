@@ -6,7 +6,7 @@ using static System.Console;
 
 namespace Extensions
 {
-    public static class LogExts
+    internal static class LogExts
     {
         private static bool _shouldLog = true;
         public static bool ShouldLog { get {return  _shouldLog; } set {_shouldLog = true;}}
@@ -17,7 +17,7 @@ namespace Extensions
                 WriteLine(msg);
         }
 
-        public static void Log(this Loan loan, string msg, DbContext context)
+        public static void Log(this LoanBase loan, string msg, DbContext context)
         {
             if (loan != null)
             {
@@ -60,7 +60,7 @@ namespace Extensions
         {
             context.Entry(obj).State.ShouldBe(state);
         }
-        public static void LoanGraphStateShouldBe(this DbContext context, Loan loan, Microsoft.EntityFrameworkCore.EntityState state)
+        public static void LoanGraphStateShouldBe(this DbContext context, LoanBase loan, Microsoft.EntityFrameworkCore.EntityState state)
         {
             context.StateShouldBe(loan, state);
             context.StateShouldBe(loan.Lender, state);

@@ -2,7 +2,7 @@ using System;
 
 namespace Model
 {
-    public class Thing
+    internal class Thing
     {
         public Thing()
         {

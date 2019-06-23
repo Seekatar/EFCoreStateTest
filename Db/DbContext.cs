@@ -3,12 +3,13 @@ using Model;
 
 namespace Db
 {
-    public class LoanContext : DbContext
+    internal class LoanContext : DbContext
     {
         public DbSet<Thing> Things { get; set; }
         public DbSet<Loan> Loans { get; set; }
         public DbSet<Lender> Lenders { get; set; }
         public DbSet<LenderContact> LenderContacts { get; set; }
+        public DbSet<LoanEx> LoanExs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

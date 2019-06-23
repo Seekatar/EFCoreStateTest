@@ -2,16 +2,18 @@ using System;
 
 namespace Model
 {
-    public class Loan
+    internal class LoanBase
     {
-        public Loan() {}
-        public Loan(bool childrenToo = false)
+        protected LoanBase()
+        {
+            Name = $"Loan-{Guid.NewGuid()}";
+        }
+        protected LoanBase(bool childrenToo = false)
         {
             Name = $"Loan-{Guid.NewGuid()}";
             if (childrenToo)
             {
                 Lender = new Lender();
-                LenderContact = new LenderContact {Lender = Lender};
             }
         }
         public Guid Id { get; set; }
@@ -20,4 +22,33 @@ namespace Model
         public LenderContact LenderContact { get; set; }
     }
 
+    internal class Loan : LoanBase
+    {
+        public Loan()
+        {
+        }
+        public Loan(bool childrenToo = false) : base(childrenToo)
+        {
+            if (childrenToo)
+            {
+                LenderContact = new LenderContact { Lender = Lender };
+            }
+        }
+    }
+
+    internal class LoanEx : LoanBase
+    {
+        public LoanEx()
+        {
+        }
+        public LoanEx(bool childrenToo = false) : base(childrenToo)
+        {
+            if (childrenToo)
+            {
+                LenderContact = new LenderContact { Lender = Lender };
+            }
+        }
+        public Guid? LenderId { get; set; }
+        public Guid? LenderContactId { get; set; }
+    }
 }

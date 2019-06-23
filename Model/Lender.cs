@@ -2,7 +2,7 @@ using System;
 
 namespace Model
 {
-    public class Lender
+    internal class Lender
     {
         public Lender() {}
 

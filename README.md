@@ -2,7 +2,7 @@
 This project has a bunch of tests that show how EF Core state works.
 
 # The Code
-The project is was created using the .NET Core NUnit template, then added the `Microsoft.EntityFrameworkCore.SqlServer` and `Shouldly` packages.  It only consists of unit tests that test the various ways EF Core core changes the state of objects.  I used VS Code on Windows for development.  There is also a sln file for use in Visual Studio 2019.  It's Live Unit Test feature works well with this project.
+The project is was created using the .NET Core NUnit template, then added the `Microsoft.EntityFrameworkCore.SqlServer` and `Shouldly` packages.  It only consists of unit tests that test the various ways EF Core core changes the state of objects.  I used VS Code on Windows for development.  There is also a sln file for use in Visual Studio 2019.  Its Live Unit Test feature works well with this project.
 
 Like the EF Core samples, this code uses the code-first method, and a `(localdb)\mssqllocaldb` database server.
 
@@ -25,7 +25,7 @@ The `DbContext` tracks the state of objects so that when `SaveChanges` is called
 |Unchanged |None|Retrieved from database, Attached, or after `SaveChanges`
 |Detached  |None|Context is not tracking the object
 
-Objects that the context does not know about are in the `Detached` state.  For the context to know about an object, you either retrieve it from the database with the context, or use one of the calls to get in into the context.
+Objects that the context does not know about are in the `Detached` state.  For the context to know about an object, you either retrieve it from the database with the context or use one of the calls to get in into the context.
 
 |Method    |Resulting State
 |----------|-----------------------
@@ -34,7 +34,7 @@ Objects that the context does not know about are in the `Detached` state.  For t
 |Find or retrieve via DbSet, etc.|Unchanged
 |Attach    |Added if PK is not set else Unchanged
 
-If EF Core knows about your PKs, `Update` works for both adds and updates of objects.  There may be cases where the object need to have the PK set ahead of time, so you'll need to call `Add` to do an add.  An example is where a child table's PK is a FK to the parent.
+If EF Core knows about your PKs, `Update` works for both adds and updates of objects.  There may be cases where the object needs to have the PK set ahead of time, so you'll need to call `Add` to do an add.  An example is where a child table's PK is a FK to the parent.
 
 The following diagram shows how the EF Core State changed with various `DbContext` methods, or other actions.
 
@@ -57,9 +57,9 @@ This file tests state changes for one object with no realtionships.  Each of the
 ||Construct_Add_Save_SingleObject
 ||Construct_Attach_Save_SingleObject
 |Detached->Modified->Unchanged|Save_Update_SingleObject
-|retrive->Unchanged|Save_Find_SingleObject
-|retrive->Unchanged->Modified->Unchanged|Save_Find_Update_SingleObject
-|retrive->Unchanged->Deleted->Detached|Save_Find_Delete_SingleObject
+|retrieve->Unchanged|Save_Find_SingleObject
+|retrieve->Unchanged->Modified->Unchanged|Save_Find_Update_SingleObject
+|retrieve->Unchanged->Deleted->Detached|Save_Find_Delete_SingleObject
 |Detached->Unchanged|Construct_Attach_SetState_SingleObject
 ||Construct_SetState_SingleObject
 
@@ -68,9 +68,9 @@ Note, the last two explicitly set the state which is a path not shown in the dia
 ## ChangingGraphStatesShould.cs
 This file does the basic actions on the `Loan` graph of objects.  When retrieving a `Loan` that include the `Lender` and `LenderContact`, the `Lender` will be in the graph twice (since `LenderContact` also has the same `Lender`).
 
-When sending that to a server (simulated with serializaion in the test) and trying to `Attach()` or `Update()` the object, EF will throw an exception saying that a `Lender` with the same Id is already being tracked.
+When sending that to a server (simulated with serialization in the test) and trying to `Attach()` or `Update()` the object, EF will throw an exception saying that a `Lender` with the same Id is already being tracked.
 
-Setting the `State` directly on the `Loan` avoids the recursive attaching of the other functions and then the `Loan` can be saved in the database.  There are other ways around this, but in my particular case, that's what was being sent to the server.
+Setting the `State` directly on the `Loan` avoids the recursive attaching of the other functions and then the `Loan` can be saved in the database.  There are other ways around this, but in my case, that's what was being sent to the server.  One way is to include `LenderId` and `LenderContactId` in the `Loan` object.  The `LoanEx` class does that and `ChangingGraphExStatesShould.cs` demonstrates that.
 
 |Path    |Test
 |----------|-----------------------
@@ -78,13 +78,13 @@ Setting the `State` directly on the `Loan` avoids the recursive attaching of the
 ||ConstructGraph_Add_Save
 ||ConstructGraph_Update_Save
 |Detached->Modified->Unchanged|Save_Linq_Include_SetState_Graph
-|retrive->Unchanged|Save_Find_Graph
+|retrieve->Unchanged|Save_Find_Graph
 ||Save_Linq_Graph
 ||Save_Linq_Include_Graph
 |Detached->error attaching|Save_Linq_Include_Attach_Graph_Throw
 ||Save_Linq_Include_Update_Graph_Throw
-|retrive->Unchanged->Modified->Unchanged|Save_Find_Update_Graph
-|retrive->Unchanged->Deleted->Detached|ConstructGraph_Add_Save_Delete
+|retrieve->Unchanged->Modified->Unchanged|Save_Find_Update_Graph
+|retrieve->Unchanged->Deleted->Detached|ConstructGraph_Add_Save_Delete
 |Detached->Unchanged|ConstructGraph_Attach_SetState
 ||ConstructGraph_SetState
 
