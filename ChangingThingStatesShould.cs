@@ -4,13 +4,15 @@ using NUnit.Framework;
 using Extensions;
 using Shouldly;
 using static Microsoft.EntityFrameworkCore.EntityState;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Tests
 {
     internal class ChangingThingStatesShould : TestsBase
     {
         [Test]
-        public void Construct_Add_Save_SingleObject()
+        public void Construct_Add_Save()
         {
             using (var context = new LoanContext())
             {
@@ -29,7 +31,7 @@ namespace Tests
         }
 
         [Test]
-        public void Construct_Update_Save_SingleObject()
+        public void Construct_Update_Save()
         {
             using (var context = new LoanContext())
             {
@@ -48,7 +50,7 @@ namespace Tests
         }
 
         [Test]
-        public void Construct_Attach_Save_SingleObject()
+        public void Construct_Attach_Save()
         {
             using (var context = new LoanContext())
             {
@@ -67,20 +69,20 @@ namespace Tests
         }
 
         [Test]
-        public void Attach_Saved_SingleObject()
+        public void Attach_Saved()
         {
             var thing = SaveNewThing();
             using (var context = new LoanContext())
             {
                 context.StateShouldBe(thing, Detached);
                 context.Attach(thing);
-                thing.Log("Attached a saved", context);
+                thing.Log("Attached after saved", context);
                 context.StateShouldBe(thing, Unchanged);
             }
         }
 
         [Test]
-        public void Construct_Attach_SetState_SingleObject()
+        public void Construct_Attach_SetState()
         {
             using (var context = new LoanContext())
             {
@@ -95,7 +97,7 @@ namespace Tests
         }
 
         [Test]
-        public void Construct_SetState_SingleObject()
+        public void Construct_SetState()
         {
             using (var context = new LoanContext())
             {
@@ -110,7 +112,7 @@ namespace Tests
         }
 
         [Test]
-        public void Save_Find_SingleObject()
+        public void Save_Find()
         {
             var thing = SaveNewThing();
             using (var context = new LoanContext())
@@ -123,7 +125,20 @@ namespace Tests
         }
 
         [Test]
-        public void Save_Update_SingleObject()
+        public void Save_Find_AsNoTracking()
+        {
+            var thing = SaveNewThing();
+            using (var context = new LoanContext())
+            {
+                var foundThing = context.Set<Thing>().Where(o => o.Id == thing.Id).AsNoTracking().SingleOrDefault();
+                foundThing.ShouldNotBeNull();
+                foundThing.Log("Find", context);
+                context.StateShouldBe(foundThing, Detached);
+            }
+        }
+
+        [Test]
+        public void Save_Update()
         {
             var thing = SaveNewThing();
             using (var context = new LoanContext())
@@ -138,7 +153,7 @@ namespace Tests
         }
 
         [Test]
-        public void Save_Find_Update_SingleObject()
+        public void Save_Find_Update()
         {
             var thing = SaveNewThing();
             using (var context = new LoanContext())
@@ -157,7 +172,7 @@ namespace Tests
         }
 
         [Test]
-        public void Save_Find_Delete_SingleObject()
+        public void Save_Find_Delete()
         {
             var thing = SaveNewThing();
             using (var context = new LoanContext())

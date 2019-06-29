@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Shouldly;
@@ -14,7 +15,10 @@ namespace Extensions
         private static void WriteLog(string msg)
         {
             if ( _shouldLog )
+            {
                 WriteLine(msg);
+                Debug.WriteLine(msg);
+            }
         }
 
         public static void Log(this LoanBase loan, string msg, DbContext context)

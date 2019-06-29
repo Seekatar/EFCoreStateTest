@@ -39,7 +39,7 @@ namespace Tests
 
             using (var context = new LoanContext())
             {
-                // in case of Loan with childrenToo, this throws since Lender in graph twice
+                // for the analogous Loan test, this throws since Lender in graph twice
                 context.Attach(xferLoan);
                 context.StateShouldBe(xferLoan, Unchanged);
             }
@@ -53,9 +53,12 @@ namespace Tests
 
             using (var context = new LoanContext())
             {
-                // in case of Loan with childrenToo, this throws since Lender in graph twice
+                // for the analogous Loan test, this throws since Lender in graph twice
                 context.Update(xferLoan);
                 context.StateShouldBe(xferLoan, Modified);
+
+                context.SaveChanges(); // updates only Loans since others null
+                context.StateShouldBe(xferLoan, Unchanged);
             }
         }
 

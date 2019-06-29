@@ -29,7 +29,7 @@ namespace Tests
                 loan.Log("Update after constructed", context);
                 context.LoanGraphStateShouldBe(loan, Added);
 
-                context.SaveChanges();
+                context.SaveChanges(); // inserts into 3 tables
                 loan.Log("SaveChanges", context);
                 context.LoanGraphStateShouldBe(loan, Unchanged);
                 context.LoanGraphStateShouldBe(loan, Unchanged);
@@ -54,7 +54,7 @@ namespace Tests
                 loan.Log("Add", context);
                 context.LoanGraphStateShouldBe(loan, Added);
 
-                context.SaveChanges();
+                context.SaveChanges(); // inserts into 3 tables
                 loan.Log("SaveChanges", context);
                 context.LoanGraphStateShouldBe(loan, Unchanged);
                 loan.Id.ShouldNotBe(Guid.Empty);
@@ -78,7 +78,7 @@ namespace Tests
                 loan.Log("Attach after constructed", context);
                 context.LoanGraphStateShouldBe(loan, Added);
 
-                context.SaveChanges();
+                context.SaveChanges(); // inserts into 3 tables
                 loan.Log("SaveChanges", context);
                 context.LoanGraphStateShouldBe(loan, Unchanged);
                 loan.Id.ShouldNotBe(Guid.Empty);
@@ -103,6 +103,14 @@ namespace Tests
                 context.StateShouldBe(loan, Unchanged);
                 context.StateShouldBe(loan.Lender, Added);
                 context.StateShouldBe(loan.LenderContact, Added);
+
+                context.SaveChanges(); // inserts into 3 tables
+                loan.Log("SaveChanges", context);
+                context.LoanGraphStateShouldBe(loan, Unchanged);
+                loan.Id.ShouldNotBe(Guid.Empty);
+                loan.Lender.Id.ShouldNotBe(Guid.Empty);
+                loan.LenderContact.Id.ShouldNotBe(Guid.Empty);
+                loan.LenderContact.Lender.Id.ShouldBe(loan.Lender.Id);
             }
         }
 
@@ -170,6 +178,7 @@ namespace Tests
                             .Include(o => o.LenderContact)
                             .SingleOrDefault(o => o.Id == loan.Id);
                 foundLoan.ShouldNotBeNull();
+                ReferenceEquals(foundLoan.Lender, foundLoan.LenderContact.Lender).ShouldBeTrue();
 
                 foundLoan.Log("Find", context);
                 context.LoanGraphStateShouldBe(foundLoan, Unchanged);
@@ -215,6 +224,29 @@ namespace Tests
         }
 
         [Test]
+        public void Save_Linq_Include_TrackGraph_Func()
+        {
+            LogMsg(MethodBase.GetCurrentMethod().Name);
+            var xferLoan = SaveNewLoanAndDetach();
+
+            using (var context = new LoanContext())
+            {
+                context.ChangeTracker.TrackGraph(xferLoan, Unchanged, (node,state) => {
+                    node.Entry.State = Unchanged;
+                    if (node.Entry.Entity is Loan)
+                    {
+                        node.Entry.State = Modified;
+                    }
+                    return !(node.Entry.Entity is LenderContact);
+                });
+                xferLoan.Log("TrackGraph", context);
+                context.StateShouldBe(xferLoan, Modified);
+                context.StateShouldBe(xferLoan.Lender, Unchanged);
+                context.StateShouldBe(xferLoan.LenderContact, Unchanged);
+            }
+        }
+
+        [Test]
         public void Save_Linq_Include_SetState_Graph()
         {
             LogMsg(MethodBase.GetCurrentMethod().Name);
@@ -229,12 +261,58 @@ namespace Tests
                 context.StateShouldBe(xferLoan.Lender, Detached);
                 context.StateShouldBe(xferLoan.LenderContact, Detached);
 
-                context.SaveChanges();
+                context.SaveChanges(); // updates only Loans table
                 context.StateShouldBe(xferLoan, Unchanged);
                 context.StateShouldBe(xferLoan.Lender, Detached);
                 context.StateShouldBe(xferLoan.LenderContact, Detached);
             }
         }
+
+        [Test]
+        public void Construct_WithExisting_Children_SetState()
+        {
+            LogMsg(MethodBase.GetCurrentMethod().Name);
+
+            var xferLoan = SaveNewLoanAndDetach();
+            var loan = new Loan
+            {
+                Lender = xferLoan.Lender,
+                LenderContact = xferLoan.LenderContact
+            };
+
+            using (var context = new LoanContext())
+            {
+                loan.Log("Constructed with existing children", context);
+                context.LoanGraphStateShouldBe(loan, Detached);
+
+                context.Entry(loan).State = Added;
+                loan.Log("State Set", context);
+                context.StateShouldBe(loan, Added);
+                context.StateShouldBe(loan.Lender, Detached);
+                context.StateShouldBe(loan.LenderContact, Detached);
+
+                context.SaveChanges(); // inserts into only Loans table
+                context.StateShouldBe(loan, Unchanged);
+                context.StateShouldBe(loan.Lender, Detached);
+                context.StateShouldBe(loan.LenderContact, Detached);
+            }
+
+            using (var context = new LoanContext())
+            {
+                var foundLoan = context.Set<Loan>()
+                    .Include(o => o.Lender)
+                    .Include(o => o.LenderContact)
+                    .SingleOrDefault(o => o.Id == loan.Id);
+                foundLoan.ShouldNotBeNull();
+                foundLoan.Lender.ShouldNotBeNull();
+                foundLoan.LenderContact.ShouldNotBeNull();
+                foundLoan.Lender.Id.ShouldBe(loan.Lender.Id);
+                foundLoan.LenderContact.Id.ShouldBe(loan.LenderContact.Id);
+                ReferenceEquals(foundLoan.Lender, foundLoan.LenderContact.Lender).ShouldBeTrue();
+            }
+        }
+
+
 
         [Test]
         public void Save_Find_Update_Graph()
@@ -247,9 +325,11 @@ namespace Tests
                 foundLoan.ShouldNotBeNull();
                 foundLoan.Log("Find", context);
                 context.StateShouldBe(foundLoan, Unchanged);
+
                 foundLoan.Name = "Peoria";
                 context.StateShouldBe(foundLoan, Modified);
-                context.SaveChanges();
+
+                context.SaveChanges(); // updates only Loans table
                 context.StateShouldBe(foundLoan, Unchanged);
                 foundLoan = context.Find<Loan>(loan.Id);
                 foundLoan.Name.ShouldBe("Peoria");
@@ -269,6 +349,7 @@ namespace Tests
                 foundLoan.ShouldNotBeNull();
                 foundLoan.Log("Find", context);
                 context.StateShouldBe(foundLoan, Unchanged);
+                ReferenceEquals(foundLoan.Lender, foundLoan.LenderContact.Lender).ShouldBeTrue();
 
                 context.Remove(foundLoan);
                 foundLoan.Log("Remove", context);
@@ -276,7 +357,7 @@ namespace Tests
                 context.StateShouldBe(foundLoan.Lender, Unchanged); //  not cascading delete
                 context.StateShouldBe(foundLoan.LenderContact, Unchanged);
 
-                context.SaveChanges();
+                context.SaveChanges(); // deletes only from Loans
                 foundLoan.Log("SaveChanged", context);
                 context.StateShouldBe(foundLoan, Detached);
                 context.StateShouldBe(foundLoan.Lender, Unchanged); //  not cascading delete

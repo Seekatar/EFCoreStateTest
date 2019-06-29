@@ -6,10 +6,12 @@ namespace Model
     {
         public Thing()
         {
-            Name = $"City-{Guid.NewGuid().ToString()}";
+            Name = $"Name-{Guid.NewGuid().ToString()}";
+            Title = $"Title-{Guid.NewGuid().ToString()}";
         }
 
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public string Title { get; set; }
     }
 }

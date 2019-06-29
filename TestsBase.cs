@@ -82,7 +82,7 @@ namespace Tests
                 context.LoanGraphStateShouldBe(foundLoan, Unchanged);
                 foundLoan.Lender.ShouldNotBeNull();
                 foundLoan.LenderContact.ShouldNotBeNull();
-                object.ReferenceEquals(foundLoan.Lender, foundLoan.LenderContact.Lender).ShouldBeTrue();
+                ReferenceEquals(foundLoan.Lender, foundLoan.LenderContact.Lender).ShouldBeTrue();
 
                 xferLoan = JsonConvert.DeserializeObject<Loan>(JsonConvert.SerializeObject(foundLoan));
                 context.LoanGraphStateShouldBe(xferLoan, Detached);
