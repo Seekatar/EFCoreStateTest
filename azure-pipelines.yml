@@ -15,10 +15,11 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+
 - task: DotNetCoreInstaller@0
   displayName: 'dotnet install'
   inputs:
-    version: '2.2.0'
+    version: '2.2.1'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet restore'
