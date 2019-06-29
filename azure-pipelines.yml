@@ -6,37 +6,35 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'windows-latest'
+jobs:
+- job: Build_Test
+  strategy:
+    matrix: 
+      Linux:
+        matrixName: Ubuntu
+        vmImageName: ubuntu-latest
+      Mac:
+        matrixName: Mac
+        vmImageName: macos-latest
+      Windows:
+        matrixName: Windows
+        vmImageName: windows-latest
+  pool:
+    vmImage: $(vmImageName)
 
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  variables:
+    buildPlatform: 'Any CPU'
+    buildConfiguration: 'Release'
 
-steps:
+  steps:
+  - task: DotNetCoreInstaller@0
+    displayName: 'dotnet install'
+    inputs:
+      version: '2.2.104'
 
-- task: DotNetCoreInstaller@0
-  displayName: 'dotnet install'
-  inputs:
-    version: '2.2.104'
-
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet restore'
-  inputs:
-    command: restore
-    projects: '**/*.csproj'
-
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet build'
-  inputs:
-    command: build
-    projects: '**/*.csproj'
-
-
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet test'
-  inputs:
-    command: test
-    projects: '**/*.csproj'
-    publishTestResults: true
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet test'
+    inputs:
+      command: test
+      projects: '**/*.csproj'
+      publishTestResults: true
