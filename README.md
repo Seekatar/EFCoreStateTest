@@ -1,4 +1,6 @@
 # Entity Framework Core State Tests
+![BuildStatus](https://dev.azure.com/MrSeekatar/EFStateTest/_apis/build/status/Seekatar.EFCoreStateTest?branchName=master)
+
 This project has a set of tests that demonstrate how EF Core Entity State works.  These examples were created to help me better understand how EF Core manages state, and what SQL it generates.  It came from a problem where the object model had the same object in the graph multiple times.  EF Core did fine if the graph was retrieved from the database, but if deserialized and serialized, it thinks I'm trying to track the same object twice.  These examples show that case.
 
 # The Code
