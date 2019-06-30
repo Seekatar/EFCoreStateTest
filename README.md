@@ -1,7 +1,7 @@
 # Entity Framework Core State Tests
 ![BuildStatus](https://dev.azure.com/MrSeekatar/EFStateTest/_apis/build/status/Seekatar.EFCoreStateTest?branchName=master)
 
-This project has a set of tests that demonstrate how EF Core Entity State works.  These examples were created to help me better understand how EF Core manages state, and what SQL it generates.  It came from a problem where the object model had the same object in the graph multiple times.  EF Core did fine if the graph was retrieved from the database, but if deserialized and serialized, it thinks I'm trying to track the same object twice.  These examples show that case.
+This project has a set of tests that demonstrate how EF Core Entity State works.  These examples were created to help me better understand how EF Core manages state, and what SQL it generates.  It came from a problem where the object model had the same object in the graph multiple times.  EF Core did fine if the graph was retrieved from the database, but if de-serialized and serialized, it thinks I'm trying to track the same object twice.  These examples show that case.
 
 # The Code
 The project is was created using the .NET Core 2.2 NUnit template, with the addition of the `Microsoft.EntityFrameworkCore.SqlServer` and `Shouldly` packages.  It only consists of unit tests that test the various ways EF Core changes the state of objects.  I mainly used [VS Code](https://code.visualstudio.com/) on Windows for development.  There is also a sln file for use in Visual Studio 2019.  VS's [Live Unit Testing](https://docs.microsoft.com/en-us/visualstudio/test/live-unit-testing?view=vs-2019) feature works well with this project.
@@ -102,7 +102,7 @@ Setting the `State` directly on the `Loan` avoids the recursive attaching of the
 The `Save_Linq_Include_TrackGraph_Func` test uses the `ChangeTracker.TrackGraph` method to hook into the change tracking process, which can be useful if you have a complex graph and want to control how the states are set.
 
 # Final Thoughts
-As with most things, the simple cases are easy enough, but you can often get into the weeds with complex cases.  In my case the documentation was not helpful when getting the error about tracking the object, so I ended up doing this empirical analysis of the issue.  I found chapter 9 of [Entity Framework Core in Action book.](https://www.manning.com/books/entity-framework-core-in-action) to have the best explantation of change tracking in EF Core.
+As with most things, the simple cases are easy enough, but you can often get into the weeds with complex cases.  In my case the documentation was not helpful when getting the error about tracking the object, so I ended up doing this empirical analysis of the issue.  I found chapter 9 of [Entity Framework Core in Action book.](https://www.manning.com/books/entity-framework-core-in-action) to have the best explanation of change tracking in EF Core.
 
 # Links
 * [Microsoft EF Core doc](https://docs.microsoft.com/en-us/ef/core/)
